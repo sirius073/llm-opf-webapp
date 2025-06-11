@@ -8,7 +8,8 @@ def load_model(model_id: str):
     model = AutoModelForCausalLM.from_pretrained(
         model_id,
         torch_dtype=torch.float16 if device == "cuda" else torch.float32,
-        device_map="auto"
+        device_map="auto",
+        attn_implementation="eager" 
     )
     hf_pipeline = pipeline("text-generation", model=model, tokenizer=tokenizer, max_new_tokens=500)
     return HuggingFacePipeline(pipeline=hf_pipeline)
