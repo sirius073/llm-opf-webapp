@@ -1,6 +1,6 @@
 import torch
 from transformers import AutoTokenizer, AutoModelForCausalLM, pipeline
-from langchain.llms import HuggingFacePipeline
+from langchain_community.llms import HuggingFacePipeline
 
 def load_model(model_id: str):
     tokenizer = AutoTokenizer.from_pretrained(model_id)
@@ -11,5 +11,5 @@ def load_model(model_id: str):
         device_map="auto",
         attn_implementation="eager" 
     )
-    hf_pipeline = pipeline("text-generation", model=model, tokenizer=tokenizer, max_new_tokens=500, device=0)
+    hf_pipeline = pipeline("text-generation", model=model, tokenizer=tokenizer, max_new_tokens=500)
     return HuggingFacePipeline(pipeline=hf_pipeline)
