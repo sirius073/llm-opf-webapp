@@ -75,7 +75,7 @@ Do not explain anything.
 Do not output text outside code.
 Generate only concise, correct Python code.
 Do not print the outputs. Store all numerical outputs inside the `result` dictionary with appropriate keys.
-NOTE: Store all the plots generated as a list in the 'result' dictionary only.
+NOTE: Plot using 'matplotlib' only and store all the plots generated as a list in the 'result' dictionary only.
 
 </instruction>
 <user>
