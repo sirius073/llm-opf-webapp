@@ -62,10 +62,7 @@ if st.session_state.model_loaded:
         if "plots" in result_dict:
             for i, fig in enumerate(result_dict["plots"]):
                 st.markdown(f"**Plot {i+1}**")
-                try:
-                    st.pyplot(fig)  # Try matplotlib
-                except:
-                    st.plotly_chart(fig)  # If matplotlib fails, try Plotly
+                st.pyplot(fig) 
 
         # 🔸 Handle single plot
         elif "plot" in result_dict:
