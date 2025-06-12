@@ -75,7 +75,8 @@ Do not explain anything.
 Do not output text outside code.
 Generate only concise, correct Python code.
 Do not print the numerical outputs. Store all numerical outputs inside the `result` dictionary with appropriate keys.
-Only display plots using plt.show().
+Always generate plotting code that works inside a Streamlit app.
+Use st.pyplot(fig) instead of plt.show() for matplotlib, and st.plotly_chart(fig) instead of fig.show() for Plotly.
 
 </instruction>
 <user>
