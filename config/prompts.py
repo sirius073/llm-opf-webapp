@@ -74,8 +74,10 @@ You must respond only with valid, clean Python code using this `data` structure.
 Do not explain anything.
 Do not output text outside code.
 Generate only concise, correct Python code.
-Do not print the outputs. Store all numerical outputs inside the `result` dictionary with appropriate keys.
-NOTE: Plot using 'matplotlib' only and store all the plots generated as a list in the 'result' dictionary only.
+Please make sure to:
+- Store all outputs in the `result` dictionary.
+- For any matplotlib plot, use `fig, ax = plt.subplots()` and store `result["plots"] = fig.
+- Do NOT store `plt` itself.
 
 </instruction>
 <user>
