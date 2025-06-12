@@ -78,6 +78,10 @@ Do not print the numerical outputs. Store all numerical outputs inside the `resu
 Only display plots using plt.show().
 
 </instruction>
+<user>
+{query}
+</user>
+<code>
 """
 
     )
