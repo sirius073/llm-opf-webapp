@@ -1,5 +1,4 @@
 import os
-
 os.environ["STREAMLIT_SERVER_ENABLE_FILE_WATCHER"] = "false"
 
 import torch
@@ -19,10 +18,12 @@ st.title("🔌 Power Grid Code Assistant with LLM")
 if "model_loaded" not in st.session_state:
     st.session_state.model_loaded = False
 
+# Sidebar for model + file upload
 with st.sidebar:
     st.header("Configuration")
     model_id = st.text_input("Model ID", value="deepseek-ai/deepseek-coder-6.7b-instruct")
     uploaded_file = st.file_uploader("Upload JSON file", type="json")
+
     if st.button("Load Model and Data"):
         if uploaded_file:
             st.session_state.data = json.load(uploaded_file)
@@ -30,21 +31,50 @@ with st.sidebar:
             st.session_state.code_chain = LLMChain(llm=st.session_state.llm, prompt=code_template)
             st.session_state.summary_chain = LLMChain(llm=st.session_state.llm, prompt=summary_template)
             st.session_state.model_loaded = True
-            st.success("Model and data loaded!")
+            st.success("✅ Model and data loaded!")
 
+# Main logic after loading
 if st.session_state.model_loaded:
     st.subheader("💬 Ask a Question")
     query = st.text_area("Enter your prompt", height=150)
+
     if st.button("Run Query"):
-        with st.spinner("Running..."):
+        with st.spinner("⚙️ Running..."):
             summary, code, result_dict = run_pipeline(
                 query,
                 st.session_state.code_chain,
                 st.session_state.summary_chain,
                 st.session_state.data,
             )
+
+        st.subheader("🧠 Generated Code")
         st.code(code, language="python")
-        st.json(result_dict)
-        st.success(summary)
+
+        # Show JSON result dictionary
+        if result_dict:
+            st.subheader("📦 Result Dictionary")
+            st.json(result_dict)
+
+        # Plot rendering
+        st.subheader("📊 Plots")
+
+        # 🔹 Handle multiple plots
+        if "plots" in result_dict:
+            for i, fig in enumerate(result_dict["plots"]):
+                st.markdown(f"**Plot {i+1}**")
+                try:
+                    st.pyplot(fig)  # Try matplotlib
+                except:
+                    st.plotly_chart(fig)  # If matplotlib fails, try Plotly
+
+        # 🔸 Handle single plot
+        elif "plot" in result_dict:
+            try:
+                st.pyplot(result_dict["plot"])
+            except:
+                st.plotly_chart(result_dict["plot"])
+
+        # Final summary
+        st.success(f"✅ {summary}")
 else:
-    st.info("Upload a file and load model to start.")
+    st.info("📂 Upload a file and load the model to begin.")
