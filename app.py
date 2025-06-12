@@ -70,7 +70,7 @@ if st.session_state.model_loaded:
                 st.pyplot(result_dict["plot"])
             except:
                 st.plotly_chart(result_dict["plot"])
-
+        
         # Final summary
         st.success(f"✅ {summary}")
 else:
