@@ -55,11 +55,12 @@ if st.session_state.model_loaded:
             st.subheader("📦 Result Dictionary")
             st.json(result_dict)
 
-        # Plot rendering
-        st.subheader("📊 Plots")
+        
 
         # 🔹 Handle multiple plots
         if "plots" in result_dict:
+            # Plot rendering
+            st.subheader("📊 Plots")
             for i, fig in enumerate(result_dict["plots"]):
                 st.markdown(f"**Plot {i+1}**")
                 st.pyplot(fig) 
