@@ -1,4 +1,10 @@
-import json
+import os
+
+os.environ["STREAMLIT_SERVER_ENABLE_FILE_WATCHER"] = "false"
+
+import torch
+torch.classes.__path__ = []
+
 import streamlit as st
 from config.prompts import code_template, summary_template
 from core.model import load_model
