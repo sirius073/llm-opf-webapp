@@ -6,6 +6,7 @@ import torch
 torch.classes.__path__ = []
 
 import streamlit as st
+import json
 from config.prompts import code_template, summary_template
 from core.model import load_model
 from core.executor import run_pipeline
