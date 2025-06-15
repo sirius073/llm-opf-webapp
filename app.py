@@ -50,10 +50,9 @@ if st.session_state.model_loaded:
         st.subheader("🧠 Generated Code")
         st.code(code, language="python")
 
-        # Show JSON result dictionary
-        if result_dict:
-            st.subheader("📦 Result Dictionary")
-            st.json(result_dict)
+        
+        st.subheader("📦 Result Dictionary")
+        st.json(result_dict)
 
         
 
