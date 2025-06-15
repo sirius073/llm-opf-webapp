@@ -1,5 +1,6 @@
 import re
 import streamlit as st
+import json
 
 def run_pipeline(query, code_chain, summary_chain, data):
     result = {}  # This will collect all outputs from the code
