@@ -77,8 +77,10 @@ Generate only concise, correct Python code.
 Please make sure:
 - no need to load the json file. Its already loaded in 'data' variable.
 - Store all outputs in the `result` dictionary.
-- For any matplotlib plot, use `fig, ax = plt.subplots()` and store `result["plots"] = fig.
+- For plots, use fig, ax = plt.subplots() from matplotlib.pyplot
+- If you generate one or more plots, store them in a list
 - Do NOT store `plt` itself.
+- Make sure result["plots"] is always a list, even if there's only one plot
 
 </instruction>
 <user>
