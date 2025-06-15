@@ -23,9 +23,12 @@ def run_pipeline(query, code_chain, summary_chain, data):
         result = exec_scope.get("result", {})
     except Exception as e:
         return f"Execution error: {e}", code_block, {}
-
+    serializable_result = {
+        k: v for k, v in result.items()
+        if k not in ["plot", "plots"]
+    }
     # 📄 Extract summary
-    summary_output = summary_chain.run(query=query, result=json.dumps(result, indent=2))
+    summary_output = summary_chain.run(query=query, result=json.dumps(serializable_result, indent=2))
 
     summary_match = re.search(r"<one-line-summary>(.*?)</one-line-summary>", summary_output, re.DOTALL)
     summary = summary_match.group(1).strip() if summary_match else "Summary not found."
