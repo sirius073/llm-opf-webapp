@@ -58,12 +58,16 @@ if st.session_state.model_loaded:
 
         # 🔹 Handle multiple plots
         if "plots" in result_dict:
-            all_plots=result_dict["plots"]
+            all_plots = result_dict["plots"]
             if all_plots:
                 st.subheader("📊 Plots")
+                # Make sure it's a list, even if it's a single Figure
+                if not isinstance(all_plots, list):
+                    all_plots = [all_plots]
                 for i, fig in enumerate(all_plots):
                     st.markdown(f"**Plot {i+1}**")
-                    st.pyplot(fig) 
+                    st.pyplot(fig)
+
 
         # 🔸 Handle single plot
         elif "plot" in result_dict:
