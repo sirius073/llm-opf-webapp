@@ -74,7 +74,8 @@ You must respond only with valid, clean Python code using this `data` structure.
 Do not explain anything.
 Do not output text outside code.
 Generate only concise, correct Python code.
-Please make sure to:
+Please make sure:
+- no need to load the json file. Its already loaded in 'data' variable.
 - Store all outputs in the `result` dictionary.
 - For any matplotlib plot, use `fig, ax = plt.subplots()` and store `result["plots"] = fig.
 - Do NOT store `plt` itself.
