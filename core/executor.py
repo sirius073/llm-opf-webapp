@@ -25,7 +25,8 @@ def run_pipeline(query, code_chain, summary_chain, data):
         return f"Execution error: {e}", code_block, {}
 
     # 📄 Extract summary
-    summary_output = summary_chain.run(query=query, result_json=json.dumps(result, indent=2))
+    summary_output = summary_chain.run(query=query, result=json.dumps(result, indent=2))
+
     summary_match = re.search(r"<one-line-summary>(.*?)</one-line-summary>", summary_output, re.DOTALL)
     summary = summary_match.group(1).strip() if summary_match else "Summary not found."
 
