@@ -19,6 +19,7 @@ def run_pipeline(query, code_chain, summary_chain, data):
             "st": st,  # optionally allow st access
         }
         exec(code_block, exec_scope)
+        result = exec_scope.get("result", {})
     except Exception as e:
         return f"Execution error: {e}", code_block, {}
 
