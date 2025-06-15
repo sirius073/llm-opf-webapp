@@ -58,11 +58,12 @@ if st.session_state.model_loaded:
 
         # 🔹 Handle multiple plots
         if "plots" in result_dict:
-            # Plot rendering
-            st.subheader("📊 Plots")
-            for i, fig in enumerate(result_dict["plots"]):
-                st.markdown(f"**Plot {i+1}**")
-                st.pyplot(fig) 
+            all_plots=result_dict["plots"]
+            if all_plots:
+                st.subheader("📊 Plots")
+                for i, fig in enumerate(all_plots):
+                    st.markdown(f"**Plot {i+1}**")
+                    st.pyplot(fig) 
 
         # 🔸 Handle single plot
         elif "plot" in result_dict:
