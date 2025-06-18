@@ -72,7 +72,6 @@ DATA SCHEMA: -
 </user>
 
 <code>
-#your code here
 """
 )
 
