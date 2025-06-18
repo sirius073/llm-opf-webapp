@@ -1,114 +1,98 @@
 from langchain.prompts import PromptTemplate
 
 code_template = PromptTemplate(
-        input_variables=["query"],
-        template=
+    input_variables=["query"],
+    template=
 """
 <instruction>
-You are a Python expert. I have already loaded a dataset from a JSON file into a Python variable called `data`.
+You are an expert in:
+- Electrical Power Systems
+- Data Analysis using PyTorch Geometric
+- Writing Python code for data analysis and visualization
 
-The dataset contains power grid information structured using arrays only. Here's how the data is organized:
+The dataset is already loaded into a `HeteroData` object named `data`.
+This data represents a power grid with multiple node and edge types. Here's the exact structure and dimensional meanings:
 
-#============================#
-#       DATA STRUCTURE       #
-#============================#
+DATA SCHEMA: -
 
-data = {{
-  "grid": {{
-    "nodes": {{
-      "bus": [[...], [...], ...],         # = [base_voltage_kv (0), bus_type (1), voltage_minimum (2), voltage_maximum (3)]
-      "generator": [[...], [...], ...],   # = [machine_base_mva (0), active_power_output (1), active_power_minimum (2), active_power_maximum (3), reactive_power_output (4), reactive_power_minimum (5), reactive_power_maximum (6), voltage_setpoint (7), cost_quadratic (8), cost_linear (9), cost_constant (10)]
-      "load": [[...], [...], ...],        # = [active_power_demand (0), reactive_power_demand (1)]
-      "shunt": [[...], [...], ...]        # = [susceptance (0), conductance (1)]
-    }},
-    "edges": {{
-      "ac_line": {{
-        "senders": [...],
-        "receivers": [...],
-        "features": [[...], [...], ...]   # = [angle_minimum (0), angle_maximum (1), from_end_susceptance (2), to_end_susceptance (3), resistance (4), reactance (5), thermal_rating_a (6), thermal_rating_b (7), thermal_rating_c (8)]
-      }},
-      "transformer": {{
-        "senders": [...],
-        "receivers": [...],
-        "features": [[...], [...], ...]   # = [angle_minimum (0), angle_maximum (1), resistance (2), reactance (3), thermal_rating_a (4), thermal_rating_b (5), thermal_rating_c (6), tap_ratio (7), phase_shift (8), from_end_susceptance (9), to_end_susceptance (10)]
-      }},
-      "generator_link": {{ "senders": [...], "receivers": [...] }},
-      "load_link": {{ "senders": [...], "receivers": [...] }},
-      "shunt_link": {{ "senders": [...], "receivers": [...] }}
-    }},
-    "context": {{
-      "baseMVA": float
-    }}
-  }},
-  "solution": {{
-    "nodes": {{
-      "bus": [[...], [...], ...],         # = [voltage_angle (0), voltage_magnitude (1)]
-      "generator": [[...], [...], ...]    # = [active_power_output (0), reactive_power_output (1)]
-    }},
-    "edges": {{
-      "ac_line": {{
-        "senders": [...],
-        "receivers": [...],
-        "features": [[...], [...], ...]   # = [power_to_bus (0), reactive_power_to_bus (1), power_from_bus (2), reactive_power_from_bus (3)]
-      }},
-      "transformer": {{
-        "senders": [...],
-        "receivers": [...],
-        "features": [[...], [...], ...]   # = [power_to_bus (0), reactive_power_to_bus (1), power_from_bus (2), reactive_power_from_bus (3)]
-      }}
-    }}
-  }},
-  "metadata": {{
-    "objective": float
-  }}
-}}
+# Scalar fields:
+- `data.x`: Shape = [1], global features (e.g., index or time)
+- `data.objective`: Shape = [1], optimization objective (float)
 
-#============================#
-#       INSTRUCTIONS         #
-#============================#
+# Node types:
 
-The values inside all node/edge lists are arrays with fixed positional meanings as shown above.
+- `data['bus'].x`: Shape = [14, 4], columns = [base_kv, type, vmin, vmax]
+- `data['bus'].y`: Shape = [14, 2], columns = [voltage_angle, voltage_magnitude] (solution)
 
-You must respond only with valid, clean Python code using this `data` structure.
+- `data['generator'].x`: Shape = [5, 11], columns = [machine_base_mva, p_out, p_min, p_max, q_out, q_min, q_max, v_setpoint, cost_quad, cost_lin, cost_const]
+- `data['generator'].y`: Shape = [5, 2], columns = [p_output, q_output] (solution)
 
-Do not explain anything.
-Do not output text outside code.
-Generate only concise, correct Python code.
-Please make sure:
-- no need to load the json file. Its already loaded in 'data' variable.
-- Store all outputs in the `result` dictionary.
-- For plots, use fig, ax = plt.subplots() from matplotlib.pyplot
-- If you generate one or more plots, store them in a list
-- Do NOT store `plt` itself.
-- Make sure result["plots"] is always a list, even if there's only one plot
+- `data['load'].x`: Shape = [11, 2], columns = [p_demand, q_demand]
+
+- `data['shunt'].x`: Shape = [1, 2], columns = [susceptance, conductance]
+
+# Edge types (heterogeneous):
+
+- ('bus', 'ac_line', 'bus'):
+  • edge_index: [2, 17] → [source_bus_idx, target_bus_idx] for each AC line
+  • edge_attr: [17, 9] → [angle_min, angle_max, b_from, b_to, resistance, reactance, thermal_a, thermal_b, thermal_c]
+  • edge_label: [17, 4] → [p_to, q_to, p_from, q_from]
+
+- ('bus', 'transformer', 'bus'):
+  • edge_index: [2, 3] → [source_bus_idx, target_bus_idx] for each transformer
+  • edge_attr: [3, 11] → [angle_min, angle_max, resistance, reactance, thermal_a, thermal_b, thermal_c, tap_ratio, phase_shift, b_from, b_to]
+  • edge_label: [3, 4] → [p_to, q_to, p_from, q_from]
+
+- ('generator', 'generator_link', 'bus') and ('bus', 'generator_link', 'generator'):
+  • edge_index: [2, 5] → [src, tgt] mapping of generator and its linked bus
+
+- ('load', 'load_link', 'bus') and ('bus', 'load_link', 'load'):
+  • edge_index: [2, 11] → connectivity between loads and buses
+
+- ('shunt', 'shunt_link', 'bus') and ('bus', 'shunt_link', 'shunt'):
+  • edge_index: [2, 1] → connectivity between shunt elements and buses
+
+ INSTRUCTIONS: -
+- take base_mva as 100 always.
+- Write only valid, clean Python code.
+- The `data` object is preloaded—**do not load JSON** or import it.
+- Use `matplotlib.pyplot` for any plotting with `fig, ax = plt.subplots()`.
+- Store all outputs in a dictionary named `result`.
+- If any plots are generated, store them in a list: `result["plots"] = [fig1, fig2, ...]`
+- Do **not** store `plt` itself or include explanations.
+- Always return code only—no text or comments.
+- Ensure `result["plots"]` exists and is a list (even if empty or only one plot).
 
 </instruction>
+
 <user>
 {query}
 </user>
+
 <code>
 """
-
-    )
+)
 
 summary_template = PromptTemplate(
-        input_variables=["query", "result"],
-        template=
-"""<instruction>
+    input_variables=["query", "result"],
+    template=
+"""
+<instruction>
 You are a data analyst. You are given:
+- A user query on a power grid dataset.
+- The Python execution result for that query.
 
-- A user query related to a power grid dataset.
-- The result of a Python code execution for that query.
-
-Based on the result and query output the result in one line.
+Based on this, write a one-line summary of the output.
 </instruction>
 
 <user>
 {query}
 </user>
+
 <result>
 {result}
 </result>
+
 <one-line-summary>
 """
-    )
+)
