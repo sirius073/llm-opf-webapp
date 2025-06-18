@@ -62,8 +62,7 @@ DATA SCHEMA: -
 - Store all outputs in a dictionary named `result`.
 - If any plots are generated, store them in a list: `result["plots"] = [fig1, fig2, ...]`
 - Do **not** store `plt` itself or include explanations.
-- Do not return anything in the code
-- The code should be enclosed inside <code>...</code> 
+- Do not return anything in the code 
 - Ensure `result["plots"]` exists and is a list (even if empty or only one plot).
 
 </instruction>
@@ -73,6 +72,8 @@ DATA SCHEMA: -
 </user>
 
 <code>
+#your code here
+</code>
 """
 )
 
