@@ -4,7 +4,7 @@ import json
 import torch
 from torch_geometric.data import HeteroData
 
-def run_pipeline(query, code_chain, summary_chain, data: HeteroData):
+def run_pipeline(query, code_chain, summary_chain, dataset: HeteroData):
     result = {}  # This will collect all outputs from the code
     llm_code_output = code_chain.run(query=query)
 
@@ -17,7 +17,7 @@ def run_pipeline(query, code_chain, summary_chain, data: HeteroData):
 
     try:
         exec_scope = {
-            "data": data,
+            "dataset": dataset,  # ✅ fixed here
             "result": result,
             "torch": torch,
             "st": st,  # optional, for direct use in code
