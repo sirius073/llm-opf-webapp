@@ -73,7 +73,6 @@ DATA SCHEMA: -
 
 <code>
 #your code here
-</code>
 """
 )
 
