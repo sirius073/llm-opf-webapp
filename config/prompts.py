@@ -1,7 +1,7 @@
 from langchain.prompts import PromptTemplate
 
 code_template = PromptTemplate(
-    input_variables=[],
+    input_variables=["query"],
     template=
 """
 <instruction>
