@@ -105,7 +105,7 @@ Your task is to write clean, valid Python code that:
 <code>
 """
 )
-
+print(code_template.input_variables)
 if "" in code_template.input_variables:
     code_template.input_variables.remove("")
     
