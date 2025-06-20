@@ -5,12 +5,17 @@ import torch
 from torch_geometric.data import HeteroData
 
 def run_pipeline(query, code_chain, summary_chain, dataset: HeteroData):
-    result = {}  # This will collect all outputs from the code
+    result = {}  # This will collect all outputs from the executed code
     torch.cuda.empty_cache()
 
-    # 🧠 Call code_chain using .invoke({...}) instead of .run(...)
-    llm_code_output = code_chain.invoke({"query": query})
+    # 🧠 Call the LLM code chain safely
+    raw_code_output = code_chain.invoke({"query": query})
 
+    # 🔍 Extract text if wrapped in a dict or LangChain object
+    if isinstance(raw_code_output, dict):
+        llm_code_output = raw_code_output.get("text", "")
+    else:
+        llm_code_output = str(raw_code_output)
 
     # 🔍 Extract code between <code>...</code>
     code_match = re.search(r"<code>(.*?)</code>", llm_code_output, re.DOTALL)
@@ -22,30 +27,27 @@ def run_pipeline(query, code_chain, summary_chain, dataset: HeteroData):
     if not code_match:
         return "Code not found", "", {}
 
-    # Clean extracted code
+    # ✅ Clean extracted code
     code_block = code_match.group(1).strip()
-
-    # Strip inner backticks if accidentally included inside <code>
     if code_block.startswith("```"):
         code_block = re.sub(r"^```(?:python)?\n?", "", code_block)
         code_block = re.sub(r"\n?```$", "", code_block)
-
-    # Final clean-up
     code_block = code_block.strip()
 
+    # 🔄 Execute the generated code safely
     try:
         exec_scope = {
-            "dataset": dataset,  # ✅ dataset is available in code
+            "dataset": dataset,
             "result": result,
             "torch": torch,
-            "st": st,  # Optional: allows use of Streamlit features in generated code
+            "st": st,
         }
         exec(code_block, exec_scope)
         result = exec_scope.get("result", {})
     except Exception as e:
         return f"Execution error: {e}", code_block, {}
 
-    # 📄 Convert all tensors/objects into serializable form for summary
+    # 📄 Convert tensors and objects into JSON-serializable form
     def make_serializable(v):
         if isinstance(v, torch.Tensor):
             return v.tolist()
@@ -58,15 +60,20 @@ def run_pipeline(query, code_chain, summary_chain, dataset: HeteroData):
     serializable_result = {
         k: make_serializable(v)
         for k, v in result.items()
-        if k not in ["plot", "plots"]
+        if k not in ["plot", "plots"]  # skip non-serializable visual objects
     }
     torch.cuda.empty_cache()
 
-    # 🧠 Call summary_chain using .invoke({...})
-    summary_output = summary_chain.invoke({
+    # 🧠 Call the summary LLM
+    raw_summary_output = summary_chain.invoke({
         "query": query,
         "result": json.dumps(serializable_result, indent=2)
     })
+
+    if isinstance(raw_summary_output, dict):
+        summary_output = raw_summary_output.get("text", "")
+    else:
+        summary_output = str(raw_summary_output)
 
     # 📝 Extract summary from <one-line-summary> tags
     summary_match = re.search(r"<one-line-summary>(.*?)</one-line-summary>", summary_output, re.DOTALL)
