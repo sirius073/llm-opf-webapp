@@ -7,6 +7,7 @@ from torch_geometric.data import HeteroData
 def run_pipeline(query, code_chain, summary_chain, dataset: HeteroData):
     result = {}  # This will collect all outputs from the code
     torch.cuda.empty_cache()
+    print("🚨 code_chain.input_keys:", code_chain.input_keys)
 
     # 🧠 Call code_chain using .invoke({...}) instead of .run(...)
     llm_code_output = code_chain.invoke({"query": query})
