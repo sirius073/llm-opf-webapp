@@ -35,11 +35,7 @@ with st.sidebar:
             dataset = OPFDataset(root='data', case_name=selected_case)
             st.session_state.data = dataset # Load the first (and usually only) graph
             st.session_state.llm = load_model(model_id)
-            
-            st.write("Code template input vars:", code_template.input_variables)
-            st.write("Summary template input vars:", summary_template.input_variables)
             st.session_state.code_chain = LLMChain(llm=st.session_state.llm, prompt=code_template)
-            st.write("✅ Code chain input keys:", st.session_state.code_chain.input_keys)
             st.session_state.summary_chain = LLMChain(llm=st.session_state.llm, prompt=summary_template)
             st.session_state.model_loaded = True
             st.success(f"✅ Loaded model and {selected_case}!")
