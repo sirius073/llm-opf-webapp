@@ -1,7 +1,7 @@
 from langchain.prompts import PromptTemplate
 
 code_template = PromptTemplate(
-    input_variables=["query","r"],
+    input_variables=[],
     template=
 """
 <instruction>
@@ -99,7 +99,7 @@ Your task is to write clean, valid Python code that:
 </instruction>
 
 <user>
-{query}
+
 </user>
 
 <code>
