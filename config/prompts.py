@@ -1,9 +1,7 @@
 from langchain.prompts import PromptTemplate
 
-code_template = PromptTemplate(
-    input_variables=["query"],
-    template=
-"""
+# ---------------- CODE TEMPLATE ---------------- #
+code_template_raw = """
 <instruction>
 You are a Python data analyst and power systems expert with experience using torch geometric datasets.
 
@@ -96,22 +94,23 @@ Your task is to write clean, valid Python code that:
 - Store all results in `result = {}`.
 - If any plots are generated, store them in `result["plots"] = [fig1, fig2, ...]`, or an empty list if none.
 
+
 </instruction>
 
 <user>
-
+{query}
 </user>
 
 <code>
 """
+
+code_template = PromptTemplate(
+    input_variables=["query"],  # ✅ manually specify this!
+    template=code_template_raw
 )
-print(code_template.input_variables)
-if "" in code_template.input_variables:
-    code_template.input_variables.remove("")
-    
-summary_template = PromptTemplate(
-    input_variables=["query", "result"],
-    template="""
+
+# ---------------- SUMMARY TEMPLATE ---------------- #
+summary_template_raw = """
 <instruction>
 You are a concise data analyst.
 
@@ -132,4 +131,8 @@ Do not speculate — summarize only what the result dictionary contains with ver
 
 <one-line-summary>
 """
+
+summary_template = PromptTemplate(
+    input_variables=["query", "result"],  # ✅ manually specify this!
+    template=summary_template_raw
 )
