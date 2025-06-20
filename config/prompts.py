@@ -5,55 +5,120 @@ code_template = PromptTemplate(
     template=
 """
 <instruction>
-You are a Python data analyst and power systems expert.
+You are a Python data analyst and power systems expert and have expertise in torch geometric datasets.
 
-Your goal is to write **strictly executable code** that:
-- Analyzes power grid data stored in a variable `dataset`, which is a list of PyTorch Geometric `HeteroData` objects.
-- Computes values or creates plots based on a user query.
-- Follows a clear and constrained data schema.
+Your task is to write clean, valid Python code that:
+- Analyzes a power grid dataset stored in the variable `dataset`, a list of PyTorch Geometric `HeteroData` objects.
+- Computes values or generates plots based on the user's request.
+- Respects the exact data schema below — do not assume any additional fields.
 
-# DATA STRUCTURE (Do not assume anything beyond this):
-Each `data` in `dataset` contains the following:
+# DATA SCHEMA (with index mapping and clear names)
 
-## Node Types
-- `data['bus'].x`: shape [14, 4] → [base_kv, type, vmin, vmax]
-- `data['bus'].y`: shape [14, 2] → [voltage_angle, voltage_magnitude]
+## Global Fields:
+- `data.x`: shape [1]
+  - Column 0 → global_index_or_timestep
 
-- `data['generator'].x`: shape [5, 11] → [machine_base_mva, p_out, p_min, p_max, q_out, q_min, q_max, v_setpoint, cost_quad, cost_lin, cost_const]
-- `data['generator'].y`: shape [5, 2] → [active_power_output, reactive_power_output]
+- `data.objective`: shape [1]
+  - Column 0 → optimization_objective_value
 
-- `data['load'].x`: shape [11, 2] → [active_power_demand, reactive_power_demand]
-- `data['shunt'].x`: shape [1, 2] → [susceptance, conductance]
+## NODE TYPES:
 
-## Edge Types
+- `data['bus'].x`: shape [num_buses, 4]
+  - Column 0 → base_voltage_kv
+  - Column 1 → bus_type
+  - Column 2 → minimum_voltage_magnitude_limit
+  - Column 3 → maximum_voltage_magnitude_limit
+
+- `data['bus'].y`: shape [num_buses, 2]
+  - Column 0 → voltage_angle_solution
+  - Column 1 → voltage_magnitude_solution
+
+- `data['generator'].x`: shape [num_generators, 11]
+  - Column 0 → machine_base_mva
+  - Column 1 → active_power_output (p_out)
+  - Column 2 → minimum_active_power (p_min)
+  - Column 3 → maximum_active_power (p_max)
+  - Column 4 → reactive_power_output (q_out)
+  - Column 5 → minimum_reactive_power (q_min)
+  - Column 6 → maximum_reactive_power (q_max)
+  - Column 7 → voltage_setpoint
+  - Column 8 → cost_quadratic
+  - Column 9 → cost_linear
+  - Column 10 → cost_constant
+
+- `data['generator'].y`: shape [num_generators, 2]
+  - Column 0 → active_power_solution
+  - Column 1 → reactive_power_solution
+
+- `data['load'].x`: shape [num_loads, 2]
+  - Column 0 → active_power_demand
+  - Column 1 → reactive_power_demand
+
+- `data['shunt'].x`: shape [num_shunts, 2]
+  - Column 0 → susceptance
+  - Column 1 → conductance
+
+## EDGE TYPES (heterogeneous):
+
 - ('bus', 'ac_line', 'bus'):
-  • `edge_index`: [2, 17]
-  • `edge_attr`: [17, 9] → [angle_min, angle_max, b_from, b_to, resistance, reactance, thermal_a, thermal_b, thermal_c]
-  • `edge_label`: [17, 4] → [p_to, q_to, p_from, q_from]
+  • `edge_index`: [2, num_ac_lines]
+    - Row 0 → source_bus_index
+    - Row 1 → target_bus_index
+  • `edge_attr`: [num_ac_lines, 9]
+    - Column 0 → angle_min
+    - Column 1 → angle_max
+    - Column 2 → b_from
+    - Column 3 → b_to
+    - Column 4 → resistance
+    - Column 5 → reactance
+    - Column 6 → thermal_rating_a
+    - Column 7 → thermal_rating_b
+    - Column 8 → thermal_rating_c
+  • `edge_label`: [num_ac_lines, 4]
+    - Column 0 → active_power_to
+    - Column 1 → reactive_power_to
+    - Column 2 → active_power_from
+    - Column 3 → reactive_power_from
 
 - ('bus', 'transformer', 'bus'):
-  • `edge_index`: [2, 3]
-  • `edge_attr`: [3, 11] → [angle_min, angle_max, resistance, reactance, thermal_a, thermal_b, thermal_c, tap_ratio, phase_shift, b_from, b_to]
-  • `edge_label`: [3, 4] → [p_to, q_to, p_from, q_from]
+  • `edge_index`: [2, num_transformers]
+    - Row 0 → source_bus_index
+    - Row 1 → target_bus_index
+  • `edge_attr`: [num_transformers, 11]
+    - Column 0 → angle_min
+    - Column 1 → angle_max
+    - Column 2 → resistance
+    - Column 3 → reactance
+    - Column 4 → thermal_rating_a
+    - Column 5 → thermal_rating_b
+    - Column 6 → thermal_rating_c
+    - Column 7 → tap_ratio
+    - Column 8 → phase_shift
+    - Column 9 → b_from
+    - Column 10 → b_to
+  • `edge_label`: [num_transformers, 4]
+    - Column 0 → active_power_to
+    - Column 1 → reactive_power_to
+    - Column 2 → active_power_from
+    - Column 3 → reactive_power_from
 
-- ('generator', 'generator_link', 'bus') and ('bus', 'generator_link', 'generator'): edge_index [2, 5]
-- ('load', 'load_link', 'bus') and ('bus', 'load_link', 'load'): edge_index [2, 11]
-- ('shunt', 'shunt_link', 'bus') and ('bus', 'shunt_link', 'shunt'): edge_index [2, 1]
+- ('generator', 'generator_link', 'bus') and ('bus', 'generator_link', 'generator'):
+  • `edge_index`: [2, num_generators]
 
-# STRICT CODING RULES
-- **Always** loop over each `data` in `dataset`.
+- ('load', 'load_link', 'bus') and ('bus', 'load_link', 'load'):
+  • `edge_index`: [2, num_loads]
+
+- ('shunt', 'shunt_link', 'bus') and ('bus', 'shunt_link', 'shunt'):
+  • `edge_index`: [2, num_shunts]
+
+# CODING RULES
+- You must loop through all `data` in `dataset` — never use just one `data` object.
 - Use `base_mva = 100` in all calculations.
-- **Never** import or load external files — the `dataset` variable is preloaded.
-- Use **only** standard Python libraries and `matplotlib.pyplot`.
-- Create plots using `fig, ax = plt.subplots()` only.
-- Store all outputs in a dictionary named `result`.
-
-# OUTPUT FORMAT
-- `result` must be a dictionary.
-- If any plots are created, store them in `result["plots"] = [fig1, fig2, ...]` (even if it's just one figure).
-- If no plots, set `result["plots"] = []`.
-- Do **not** use markdown formatting like triple backticks.
-- Do **not** include explanations, comments, or return statements.
+- Do not import or load any files — `dataset` is preloaded.
+- Use `matplotlib.pyplot` with `fig, ax = plt.subplots()` to create plots.
+- Do not add markdown, triple backticks, or explanations.
+- Store results in a dictionary called `result`.
+- All plots must be stored in `result["plots"] = [fig1, fig2, ...]`, or an empty list if no plots are generated.
 
 </instruction>
 
@@ -64,6 +129,7 @@ Each `data` in `dataset` contains the following:
 <code>
 """
 )
+
 summary_template = PromptTemplate(
     input_variables=["query", "result"],
     template=
