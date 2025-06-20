@@ -88,10 +88,9 @@ Your task is to write clean, valid Python code that:
 
 # CODING RULES:
 - You must iterate through all `data` in `dataset`.
-- Use `base_mva = 100` in calculations if relevant.
 - Use `matplotlib.pyplot` with `fig, ax = plt.subplots()` for plots.
 - No markdown, comments, triple backticks, or explanations.
-- Store all results in `result = {}`.
+- Store all results in `result` dictionary.
 - If any plots are generated, store them in `result["plots"] = [fig1, fig2, ...]`, or an empty list if none.
 
 
