@@ -106,6 +106,9 @@ Your task is to write clean, valid Python code that:
 """
 )
 
+if "" in code_template.input_variables:
+    code_template.input_variables.remove("")
+    
 summary_template = PromptTemplate(
     input_variables=["query", "result"],
     template="""
