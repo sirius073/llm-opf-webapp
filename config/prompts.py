@@ -2,8 +2,7 @@ from langchain.prompts import PromptTemplate
 
 code_template = PromptTemplate(
     input_variables=["query"],
-    template=
-"""
+    template="""
 <instruction>
 You are a Python data analyst and power systems expert with experience using torch geometric datasets.
 
@@ -106,11 +105,9 @@ Your task is to write clean, valid Python code that:
 """
 )
 
-
 summary_template = PromptTemplate(
     input_variables=["query", "result"],
-    template=
-"""
+    template="""
 <instruction>
 You are a concise data analyst.
 
