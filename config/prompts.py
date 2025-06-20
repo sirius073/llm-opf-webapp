@@ -1,8 +1,7 @@
 from langchain.prompts import PromptTemplate
 
-code_template = PromptTemplate(
-    input_variables=["query"],
-    template="""
+code_template = PromptTemplate.from_template(
+"""
 <instruction>
 You are a Python data analyst and power systems expert with experience using torch geometric datasets.
 
