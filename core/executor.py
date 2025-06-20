@@ -9,11 +9,26 @@ def run_pipeline(query, code_chain, summary_chain, dataset: HeteroData):
     llm_code_output = code_chain.run(query=query)
 
     # 🔍 Extract code between <code>...</code>
+   # Try extracting from <code>...</code>
     code_match = re.search(r"<code>(.*?)</code>", llm_code_output, re.DOTALL)
+    
+    # Fallback: try extracting from triple backticks
+    if not code_match:
+        code_match = re.search(r"```(?:python)?\n?(.*?)\n?```", llm_code_output, re.DOTALL)
+    
     if not code_match:
         return "Code not found", "", {}
-
+    
+    # Clean extracted code
     code_block = code_match.group(1).strip()
+    
+    # Strip inner backticks if accidentally included inside <code>
+    if code_block.startswith("```"):
+        code_block = re.sub(r"^```(?:python)?\n?", "", code_block)
+        code_block = re.sub(r"\n?```$", "", code_block)
+    
+    # Final clean-up
+    code_block = code_block.strip()
 
     try:
         exec_scope = {
