@@ -9,7 +9,7 @@ def run_pipeline(query, code_chain, summary_chain, dataset: HeteroData):
     torch.cuda.empty_cache()
 
     # 🧠 Call code_chain using .invoke({...}) instead of .run(...)
-    llm_code_output = code_chain.invoke({"query": query, "": "ignore"})
+    llm_code_output = code_chain.invoke({"query": query})
 
 
     # 🔍 Extract code between <code>...</code>
