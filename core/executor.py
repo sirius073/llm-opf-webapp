@@ -6,6 +6,7 @@ from torch_geometric.data import HeteroData
 
 def run_pipeline(query, code_chain, summary_chain, dataset: HeteroData):
     result = {}  # This will collect all outputs from the code
+    torch.cuda.empty_cache()
     llm_code_output = code_chain.run(query=query)
 
     # 🔍 Extract code between <code>...</code>
@@ -57,7 +58,7 @@ def run_pipeline(query, code_chain, summary_chain, dataset: HeteroData):
         for k, v in result.items()
         if k not in ["plot", "plots"]
     }
-
+    torch.cuda.empty_cache()
     summary_output = summary_chain.run(
         query=query,
         result=json.dumps(serializable_result, indent=2)
