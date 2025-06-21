@@ -8,7 +8,7 @@ def load_model(model_id: str):
     model = AutoModelForCausalLM.from_pretrained(
         model_id,
         torch_dtype=torch.float16 if device == "cuda" else torch.float32,
-        device_map={"": "cpu"}
+        device_map={"": "cpu"},
         attn_implementation="eager",
         trust_remote_code=True 
     )
