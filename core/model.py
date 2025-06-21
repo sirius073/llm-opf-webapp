@@ -4,7 +4,7 @@ from langchain_community.llms import HuggingFacePipeline
 
 def load_model(model_id: str):
     tokenizer = AutoTokenizer.from_pretrained(model_id)
-    device = "cuda" if torch.cuda.is_available() else "cpu"
+    device = "cpu"
     model = AutoModelForCausalLM.from_pretrained(
         model_id,
         torch_dtype=torch.float16 if device == "cuda" else torch.float32,
