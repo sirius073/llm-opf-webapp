@@ -142,15 +142,13 @@ def run_pipeline(query, code_chain, summary_chain, dataset: HeteroData):
             fix_prompt = f"""{code_template_raw2}
 <user>
 The following code failed. Fix it. Return only clean Python code.
-
+</user>
 <broken-code>
 {code_block}
 </broken-code>
 <error-message>
 {error_message}
 </error-message>
-
-</user>
 <correct-code>
 """
             fixed_output = code_chain.invoke({"query": fix_prompt})
