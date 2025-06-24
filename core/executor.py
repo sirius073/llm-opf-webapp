@@ -141,7 +141,7 @@ def run_pipeline(query, code_chain, summary_chain, dataset: HeteroData):
             st.info("🛠️ The LLM is attempting to fix the code and retry...")
             fix_prompt = f"""{code_template_raw2}
 <user>
-The following code failed. Fix it. Return only clean Python code.
+The following code failed. Fix it. Return only clean Python code completely inside 'correct-code' tag.
 </user>
 <broken-code>
 {code_block}
