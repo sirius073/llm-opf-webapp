@@ -137,6 +137,8 @@ def run_pipeline(query, code_chain, summary_chain, dataset: HeteroData):
                 return f"Execution error after {max_attempts} attempts: {error_message}", code_block, {}
 
             # 🔧 Ask LLM to fix the broken code
+            st.warning(f"❌ Attempt {attempt} failed: {error_message}")
+            st.info("🛠️ The LLM is attempting to fix the code and retry...")
             fix_prompt = f"""{code_template_raw2}
 <user>
 The following code failed. Fix it. Return only clean Python code.
