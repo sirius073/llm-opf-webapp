@@ -154,7 +154,7 @@ The following code failed. Fix it. Return only clean Python code completely insi
             fixed_output = code_chain.invoke({"query": fix_prompt})
             code_block = fixed_output.get("text", "") if isinstance(fixed_output, dict) else str(fixed_output)
 
-            fixed_match = re.search(r"<correct-code>(.*?)</correct-code>", code_block, re.DOTALL) or \
+            fixed_match = re.search(r"<code>(.*?)</code>", code_block, re.DOTALL) or \
                           re.search(r"```(?:python)?\n?(.*?)\n?```", code_block, re.DOTALL)
             if fixed_match:
                 code_block = fixed_match.group(1).strip()
