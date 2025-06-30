@@ -12,13 +12,6 @@ Your task is to write clean, valid Python code that:
 
 # DATA SCHEMA (based on OPFData, with clear names and short forms)
 
-## Global Fields:
-- `data.x`: shape [1]
-  - Column 0 → global_index_or_timestep
-
-- `data.objective`: shape [1]
-  - Column 0 → optimization_objective_value ($/h)
-
 ## NODE TYPES:
 
 ### `data['bus']` (Node):
